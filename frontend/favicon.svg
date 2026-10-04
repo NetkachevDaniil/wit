@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Обложка дневника: скруглённый прямоугольник с тёплой заливкой -->
+  <rect x="10" y="5" width="44" height="54" rx="7" fill="#f4b860" stroke="#1a1a1a" stroke-width="4"/>
+  <!-- Корешок -->
+  <path d="M21 5v54" stroke="#1a1a1a" stroke-width="4"/>
+  <!-- Две волнистые строчки, как у иконки пера -->
+  <path d="M28 24c2-3 4-3 6 0s4 3 6 0 4-3 6 0M28 36c2-3 4-3 6 0s4 3 6 0 4-3 6 0"
+        fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

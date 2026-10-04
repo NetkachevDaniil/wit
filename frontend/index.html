@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дневник</title>
+  <link rel="icon" href="favicon.ico" sizes="32x32">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Дневник</h1>
+    <nav>
+      <div class="tool-slot">
+        <button type="button" id="profile-btn" aria-label="Профиль">
+          <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+              fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.3 11.3C10 11 8.6 10.2 8.3 9.4C8 8.6 8.3 7.4 8.6 6.6C9 5.8 9.6 4.9 10.4 4.5C11.1 4.1 12.4 4.1 13.2 4.4C14 4.7 14.7 5.5 15.2 6.2C15.6 7 15.9 8.1 15.7 8.9C15.5 9.7 14.7 10.5 14 11C13.2 11.4 12.2 11.8 11.4 11.7C10.6 11.5 9.6 10.4 9.2 10.2M4.7 19.9C4.9 19.4 5.3 17.8 5.9 16.9C6.6 16 7.8 15 8.9 14.5C9.9 14 11.1 13.9 12.3 13.9C13.4 13.9 14.7 14.1 15.6 14.6C16.6 15.2 17.4 16.1 18.1 17.1C18.7 18.1 19.2 19.9 19.4 20.5"/>
+          </svg>
+        </button>
+        <div class="tool-stack">
+          <button type="button" id="font-btn" aria-label="Сменить шрифт">Аа</button>
+          <button type="button" id="theme-btn" aria-label="Включить тёмную тему">
+            <svg class="icon icon-moon" viewBox="0 0 24 24" width="32" height="32"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M20.4 13.4c-.9 4-4.6 6.9-8.8 6.6-4.8-.3-8.4-4.4-8-9.2.3-3.9 3.2-7 6.9-7.6-2 2.2-2.6 5.6-1.1 8.4 1.7 3.2 5.5 4.5 8.8 3.1.8-.3 1.5-.8 2.3-1.5M19.3 2.8Q19.4 4.1 19.1 6M17.7 4.6Q19.1 4.4 20.9 4.3"/>
+            </svg>
+            <svg class="icon icon-sun" viewBox="0 0 24 24" width="32" height="32"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15.7 12.6C15.4 13 15 14.6 14.4 15.1C13.7 15.6 12.5 15.9 11.6 15.8C10.8 15.7 9.7 15.1 9.2 14.5C8.7 13.8 8.4 12.8 8.5 11.9C8.5 11.1 8.9 10.1 9.4 9.5C10 9 11 8.6 11.8 8.5C12.6 8.5 13.7 8.7 14.4 9.2C15 9.7 15.4 10.7 15.6 11.5C15.7 12.4 15.1 13.7 15 14.1M17.9 12Q19.1 12.2 20.7 12.1M16.1 16.6Q16.9 17.4 17.8 18.5M11.5 17.9Q11.7 19.5 11.4 21.6M7.9 16.3Q6.9 16.9 5.8 18.5M6 11.6Q4.7 11.8 2.6 11.4M7.4 7.9Q6.2 6.8 5.3 5.9M11.5 6.1Q11.3 4.6 11.6 3.2M15.8 7.3Q16.7 6.6 18 5.2"/>
+            </svg>
+          </button>
+          <div class="edit-tools">
+            <button type="button" id="edit-btn" aria-label="Редактировать запись">
+              <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 20.4Q4.4 18 4.8 16.6M4.6 16.1Q9.6 11.6 15.9 4.7M16.1 5.2Q17.1 4.9 18.8 5.1M18.7 5.4Q18.6 6.7 19.1 7.9M18.9 8.2Q14.2 12.4 7.5 19.6M7.8 19.3Q5.5 20.1 3.6 20.4M14.2 7.2Q15.9 9 16.8 10.1M13.2 21c.9-1.3 1.9-1.4 2.9-.3s2.1 1.2 3 .1 2-1.3 3 .1"/>
+              </svg>
+            </button>
+            <button type="button" id="save-btn" aria-label="Сохранить изменения" hidden>
+              <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 12.1Q6.5 15.3 9.6 17.8M4.6 12.1Q6.3 14.7 9.1 17.5M9 17.8Q15.1 11.6 19.7 5.5M9.2 17.7Q14 11.5 20.1 4.9"/>
+              </svg>
+            </button>
+            <button type="button" id="cancel-btn" aria-label="Отменить изменения" hidden>
+              <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5.9 6.2Q11.4 11.4 18.4 18.3M5.5 5.9Q13 13 18 18M18.4 5.8Q11.8 11.9 5.8 18.2M18 6.3Q10.6 13.8 6.1 18.4"/>
+              </svg>
+            </button>
+          </div>
+          <button type="button" id="export-btn" aria-label="Скачать дневник в файл">
+            <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3Q12.4 9.8 11.8 15M7.3 10.2Q9 12.3 12.1 14.9M11.7 14.9Q13.8 12.7 16.5 10.2M4.6 15.5Q4.7 17.6 4.4 20.8M5 20.8Q12.8 20.2 19.7 20.5M19.4 20.8Q19.8 17.4 19.6 15.6"/>
+            </svg>
+          </button>
+          <button type="button" id="import-btn" aria-label="Загрузить дневник из файла">
+            <svg class="icon" viewBox="0 0 24 24" width="32" height="32"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <!-- Стрелка вверх и такой же «лоток» -->
+              <path d="M12.2 14.9Q12.2 8.9 11.8 3M7.8 7.5Q10.1 5.3 11.7 3.4M11.9 3.4Q14.1 5.7 16.5 7.8M4.6 15.5Q4.7 17.6 4.4 20.8M5 20.8Q12.8 20.2 19.7 20.5M19.4 20.8Q19.8 17.4 19.6 15.6"/>
+            </svg>
+          </button>
+          <input type="file" id="import-input" accept=".txt,text/plain" hidden>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <article class="entry">
+      <h2>День 1</h2>
+      <div class="entry-body" contenteditable="false">
+        <p>Сегодня решил сделать свой первый сайт. Пока это всего одна страничка, но с чего-то же надо начинать.</p>
+        <p>Разобрался, как подключать шрифты, и даже сделал кнопку, которая их переключает. Оказалось, что кнопки сами не берут шрифт страницы, пришлось им это объяснить.</p>
+        <p>Дальше хочу добавить ещё записей и придумать, что будет делать вторая кнопка.</p>
+      </div>
+    </article>
+  </main>
+  <footer>
+    <!-- <p>&copy; 2026</p> -->
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
