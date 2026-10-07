@@ -6,8 +6,18 @@ DB_PATH = Path(__file__).parent / "diary.db"
 
 
 def init_db() -> None:
-    """Создаёт таблицу записей, если её ещё нет."""
+    """Создаёт таблицы, если их ещё нет."""
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                username      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                password_hash TEXT NOT NULL,
+                created_at    TEXT NOT NULL
+            )
+            """
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS entries (

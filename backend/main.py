@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from db import get_db, init_db
+from security import hash_password
 
 
 @asynccontextmanager
@@ -29,6 +30,18 @@ class Entry(BaseModel):
     body: str
     created_at: datetime
     updated_at: datetime
+
+
+class UserCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=8, max_length=128)
+
+
+# То, что сервер возвращает о пользователе: хэша пароля здесь нет
+class User(BaseModel):
+    id: int
+    username: str
+    created_at: datetime
 
 
 @app.get("/")
@@ -87,3 +100,17 @@ def delete_entry(entry_id: int, db: Db) -> None:
     db.commit()
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Запись не найдена")
+
+
+@app.post("/auth/register", status_code=201)
+def register(data: UserCreate, db: Db) -> User:
+    now = datetime.now(UTC)
+    try:
+        cursor = db.execute(
+            "INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)",
+            (data.username, hash_password(data.password), now.isoformat()),
+        )
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Имя уже занято")
+    db.commit()
+    return User(id=cursor.lastrowid, username=data.username, created_at=now)
