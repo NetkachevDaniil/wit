@@ -6,3 +6,10 @@ node_modules/
 
 .DS_Store
 Thumbs.db
+
+# Python
+.venv/
+__pycache__/
+
+# Файлы базы данных SQLite
+*.db
