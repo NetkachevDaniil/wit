@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Дневник API")
@@ -46,3 +46,31 @@ def create_entry(data: EntryCreate) -> Entry:
 @app.get("/entries")
 def list_entries() -> list[Entry]:
     return list(entries.values())
+
+def find_entry(entry_id: int) -> Entry:
+    entry = entries.get(entry_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+    return entry
+
+@app.get("/entries/{entry_id}")
+def get_entry(entry_id: int) -> Entry:
+    return find_entry(entry_id)
+
+@app.put("/entries/{entry_id}")
+def update_entry(entry_id: int, data: EntryCreate) -> Entry:
+    entry = find_entry(entry_id)
+    updated = entry.model_copy(
+        update={
+            "title": data.title,
+            "body": data.body,
+            "updated_at": datetime.now(UTC),
+        }
+    )
+    entries[entry_id] = updated
+    return updated
+
+@app.delete("/entries/{entry_id}", status_code=204)
+def delete_entry(entry_id: int) -> None:
+    find_entry(entry_id)
+    del entries[entry_id]
