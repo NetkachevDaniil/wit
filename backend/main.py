@@ -4,11 +4,17 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from db import get_db, init_db
-from security import DUMMY_HASH, create_access_token, hash_password, verify_password
+from security import (
+    DUMMY_HASH,
+    create_access_token,
+    decode_access_token,
+    hash_password,
+    verify_password,
+)
 
 
 @asynccontextmanager
@@ -136,3 +142,32 @@ def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Db) -> Toke
             headers={"WWW-Authenticate": "Bearer"},
         )
     return Token(access_token=create_access_token(row["id"]))
+
+
+# Достаёт токен из заголовка Authorization; tokenUrl подсказывает /docs, где входить
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Db) -> User:
+    user_id = decode_access_token(token)
+    row = None
+    if user_id is not None:
+        row = db.execute(
+            "SELECT id, username, created_at FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+    if row is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Недействительный токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return User(**row)
+
+
+# Подключается к маршруту так же, как Db: user: CurrentUser
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@app.get("/auth/me")
+def read_me(user: CurrentUser) -> User:
+    return user
