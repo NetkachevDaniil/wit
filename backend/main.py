@@ -4,10 +4,11 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from db import get_db, init_db
-from security import hash_password
+from security import DUMMY_HASH, create_access_token, hash_password, verify_password
 
 
 @asynccontextmanager
@@ -42,6 +43,11 @@ class User(BaseModel):
     id: int
     username: str
     created_at: datetime
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
 
 @app.get("/")
@@ -114,3 +120,19 @@ def register(data: UserCreate, db: Db) -> User:
         raise HTTPException(status_code=409, detail="Имя уже занято")
     db.commit()
     return User(id=cursor.lastrowid, username=data.username, created_at=now)
+
+
+@app.post("/auth/login")
+def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: Db) -> Token:
+    row = db.execute(
+        "SELECT id, password_hash FROM users WHERE username = ?", (form.username,)
+    ).fetchone()
+    # Если имени нет, всё равно проверяем пароль по пустышке: время ответа не выдаст этого
+    hashed = row["password_hash"] if row else DUMMY_HASH
+    if not verify_password(form.password, hashed) or row is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Неверное имя или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return Token(access_token=create_access_token(row["id"]))
