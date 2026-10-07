@@ -1,9 +1,21 @@
+import sqlite3
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-app = FastAPI(title="Дневник API")
+from db import get_db, init_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="Дневник API", lifespan=lifespan)
 
 
 class EntryCreate(BaseModel):
@@ -23,54 +35,55 @@ class Entry(BaseModel):
 def read_root():
     return {"message": "Привет! Сервер дневника работает."}
 
-entries: dict[int, Entry] = {}
-next_id = 1
+# Соединение с базой на время одного запроса (открывает и закрывает get_db)
+Db = Annotated[sqlite3.Connection, Depends(get_db)]
+
+
+def find_entry(db: sqlite3.Connection, entry_id: int) -> Entry:
+    row = db.execute("SELECT * FROM entries WHERE id = ?", (entry_id,)).fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+    return Entry(**row)
 
 
 @app.post("/entries", status_code=201)
-def create_entry(data: EntryCreate) -> Entry:
-    global next_id
-
-    now = datetime.now(UTC)
-    entry = Entry(
-        id=next_id,
-        title=data.title,
-        body=data.body,
-        created_at=now,
-        updated_at=now,
+def create_entry(data: EntryCreate, db: Db) -> Entry:
+    now = datetime.now(UTC).isoformat()
+    cursor = db.execute(
+        "INSERT INTO entries (title, body, created_at, updated_at) VALUES (?, ?, ?, ?)",
+        (data.title, data.body, now, now),
     )
-    entries[next_id] = entry
-    next_id += 1
-    return entry
+    db.commit()
+    return find_entry(db, cursor.lastrowid)
+
 
 @app.get("/entries")
-def list_entries() -> list[Entry]:
-    return list(entries.values())
+def list_entries(db: Db) -> list[Entry]:
+    rows = db.execute("SELECT * FROM entries ORDER BY id").fetchall()
+    return [Entry(**row) for row in rows]
 
-def find_entry(entry_id: int) -> Entry:
-    entry = entries.get(entry_id)
-    if entry is None:
-        raise HTTPException(status_code=404, detail="Запись не найдена")
-    return entry
 
 @app.get("/entries/{entry_id}")
-def get_entry(entry_id: int) -> Entry:
-    return find_entry(entry_id)
+def get_entry(entry_id: int, db: Db) -> Entry:
+    return find_entry(db, entry_id)
+
 
 @app.put("/entries/{entry_id}")
-def update_entry(entry_id: int, data: EntryCreate) -> Entry:
-    entry = find_entry(entry_id)
-    updated = entry.model_copy(
-        update={
-            "title": data.title,
-            "body": data.body,
-            "updated_at": datetime.now(UTC),
-        }
+def update_entry(entry_id: int, data: EntryCreate, db: Db) -> Entry:
+    now = datetime.now(UTC).isoformat()
+    cursor = db.execute(
+        "UPDATE entries SET title = ?, body = ?, updated_at = ? WHERE id = ?",
+        (data.title, data.body, now, entry_id),
     )
-    entries[entry_id] = updated
-    return updated
+    db.commit()
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+    return find_entry(db, entry_id)
+
 
 @app.delete("/entries/{entry_id}", status_code=204)
-def delete_entry(entry_id: int) -> None:
-    find_entry(entry_id)
-    del entries[entry_id]
+def delete_entry(entry_id: int, db: Db) -> None:
+    cursor = db.execute("DELETE FROM entries WHERE id = ?", (entry_id,))
+    db.commit()
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
